@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Support Chat</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27%3E%3Crect width=%2724%27 height=%2724%27 rx=%276%27 fill=%27%235146e5%27/%3E%3Cpath d=%27M12 4l1.6 4.6L18 10l-4.4 1.4L12 16l-1.6-4.6L6 10l4.4-1.4z%27 fill=%27white%27/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #eef0f6; --bg-glow: #dfe3ff; --surface: #ffffff; --surface-2: #f5f6fa; --border: #e4e6ee;
+    --text: #151826; --muted: #6b7083; --faint: #9aa0b4;
+    --accent: #5146e5; --accent-2: #7c5cff; --accent-soft: #eceafe; --on-accent: #ffffff;
+    --ai-bubble: #f2f3f8; --human: #0f9d76; --human-soft: #e2f6ef;
+    --ok: #12996b; --ok-soft: #e1f6ee; --bad: #d23f3f; --bad-soft: #fdeaea; --warn: #b8730a; --warn-soft: #fff3dc;
+    --shadow: 0 24px 60px -20px rgba(31, 35, 80, .28), 0 2px 6px rgba(31, 35, 80, .06);
+    --radius: 20px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0c0e16; --bg-glow: #1d1b45; --surface: #151826; --surface-2: #1b1f30; --border: #262b40;
+      --text: #eceef6; --muted: #a0a6bd; --faint: #6c7290;
+      --accent: #7f75ff; --accent-2: #a58bff; --accent-soft: #24224a; --on-accent: #ffffff;
+      --ai-bubble: #1f2335; --human: #38c99c; --human-soft: #12302a;
+      --ok: #3ccf98; --ok-soft: #123026; --bad: #ff7676; --bad-soft: #3a1a1d; --warn: #f2b453; --warn-soft: #36290f;
+      --shadow: 0 24px 60px -20px rgba(0, 0, 0, .6);
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0; color: var(--text); background: var(--bg);
+    background-image: radial-gradient(1200px 600px at 10% -10%, var(--bg-glow), transparent 60%),
+                      radial-gradient(900px 500px at 110% 110%, var(--bg-glow), transparent 60%);
+    font: 15px/1.55 "Inter", "Noto Sans Thai", system-ui, -apple-system, sans-serif;
+    display: grid; place-items: center; padding: 24px 16px;
+    -webkit-font-smoothing: antialiased;
+  }
+  button, input, textarea { font: inherit; color: inherit; }
+  .app {
+    width: min(100%, 460px); height: min(100%, 760px); min-height: 520px;
+    background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow);
+    display: flex; flex-direction: column; overflow: hidden; border: 1px solid var(--border);
+  }
+
+  /* header */
+  .head { position: relative; padding: 18px 18px 16px; display: flex; align-items: center; gap: 12px;
+          background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #fff; }
+  .head.human { background: linear-gradient(135deg, #0f9d76, #22b8a0); }
+  .avatar { width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; flex: none;
+            background: rgba(255,255,255,.18); font-weight: 600; font-size: 15px; position: relative; }
+  .avatar svg { width: 22px; height: 22px; }
+  .avatar .online { position: absolute; right: 0; bottom: 0; width: 11px; height: 11px; border-radius: 50%;
+                    background: #3ee6a1; border: 2px solid rgba(255,255,255,.9); }
+  .who { flex: 1; min-width: 0; }
+  .who b { display: block; font-size: 16px; font-weight: 600; letter-spacing: -.01em; }
+  .who span { font-size: 12.5px; opacity: .85; display: flex; align-items: center; gap: 6px; }
+  .pulse { width: 7px; height: 7px; border-radius: 50%; background: #ffd27a; animation: pulse 1.6s infinite; }
+  @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(255,210,122,.7); } 70% { box-shadow: 0 0 0 8px rgba(255,210,122,0); } 100% { box-shadow: 0 0 0 0 rgba(255,210,122,0); } }
+  .icon-btn { width: 34px; height: 34px; border-radius: 10px; border: 0; background: rgba(255,255,255,.14); color: #fff;
+              display: grid; place-items: center; cursor: pointer; }
+  .icon-btn:hover { background: rgba(255,255,255,.24); }
+  .icon-btn svg { width: 18px; height: 18px; }
+
+  /* queue banner */
+  .banner { display: none; gap: 10px; align-items: center; padding: 10px 16px; font-size: 13px;
+            background: var(--warn-soft); color: var(--warn); border-bottom: 1px solid var(--border); }
+  .banner.show { display: flex; }
+  .banner svg { width: 16px; height: 16px; flex: none; }
+
+  /* messages */
+  .log { flex: 1; overflow-y: auto; padding: 18px 16px 8px; scroll-behavior: smooth; }
+  .row { display: flex; gap: 8px; align-items: flex-end; margin-top: 3px; }
+  .row.first { margin-top: 14px; }
+  .row.customer { justify-content: flex-end; }
+  .row .mini { width: 28px; height: 28px; border-radius: 50%; flex: none; display: grid; place-items: center; font-size: 11px;
+               font-weight: 600; color: #fff; background: linear-gradient(135deg, var(--accent), var(--accent-2)); visibility: hidden; }
+  .row .mini svg { width: 15px; height: 15px; }
+  .row.human .mini { background: linear-gradient(135deg, #0f9d76, #22b8a0); }
+  .row.last .mini { visibility: visible; }
+  .stack { display: flex; flex-direction: column; max-width: 78%; min-width: 0; }
+  .row.customer .stack { align-items: flex-end; }
+  .name { font-size: 11.5px; color: var(--muted); margin: 0 4px 3px; }
+  .bubble { padding: 9px 13px; border-radius: 18px; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .ai .bubble { background: var(--ai-bubble); border-bottom-left-radius: 6px; }
+  .human .bubble { background: var(--human-soft); border-bottom-left-radius: 6px; }
+  .customer .bubble { background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: var(--on-accent); border-bottom-right-radius: 6px; }
+  .time { font-size: 11px; color: var(--faint); margin: 3px 4px 0; }
+  .sys { text-align: center; margin: 16px 0 6px; }
+  .sys span { display: inline-block; font-size: 12px; color: var(--muted); background: var(--surface-2);
+              border: 1px solid var(--border); padding: 4px 12px; border-radius: 999px; }
+  .sys.err span { color: var(--bad); background: var(--bad-soft); border-color: transparent; }
+
+  /* approval card */
+  .req { margin: 14px 0 4px 36px; max-width: 320px; border: 1px solid var(--border); border-radius: 16px; overflow: hidden; background: var(--surface); }
+  .req .top { padding: 12px 14px 10px; display: flex; gap: 10px; align-items: flex-start; }
+  .req .ic { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; flex: none; background: var(--accent-soft); color: var(--accent); }
+  .req .ic svg { width: 18px; height: 18px; }
+  .req .t { font-size: 12px; color: var(--muted); }
+  .req .amt { font-size: 20px; font-weight: 700; letter-spacing: -.02em; font-variant-numeric: tabular-nums; line-height: 1.2; }
+  .req .why { font-size: 13px; color: var(--muted); overflow-wrap: anywhere; }
+  .steps { display: flex; padding: 10px 14px 12px; gap: 6px; border-top: 1px dashed var(--border); }
+  .step { flex: 1; font-size: 11px; color: var(--faint); }
+  .step i { display: block; height: 4px; border-radius: 4px; background: var(--border); margin-bottom: 6px; }
+  .step.done i { background: var(--accent); } .step.done { color: var(--text); }
+  .step.now i { background: linear-gradient(90deg, var(--accent) 0 40%, var(--border) 40%); background-size: 200% 100%; animation: load 1.4s linear infinite; }
+  @keyframes load { from { background-position: 100% 0; } to { background-position: -100% 0; } }
+  .step.ok i { background: var(--ok); } .step.ok { color: var(--ok); font-weight: 600; }
+  .step.bad i { background: var(--bad); } .step.bad { color: var(--bad); font-weight: 600; }
+  .req .note { margin: 0 14px 12px; padding: 8px 10px; font-size: 12.5px; border-radius: 10px; background: var(--surface-2); }
+
+  .typing { display: none; gap: 8px; align-items: center; margin: 12px 0 4px; color: var(--muted); font-size: 12.5px; }
+  .typing.show { display: flex; }
+  .dots { display: inline-flex; gap: 3px; padding: 10px 12px; border-radius: 16px; background: var(--ai-bubble); }
+  .dots i { width: 6px; height: 6px; border-radius: 50%; background: var(--faint); animation: b 1.2s infinite; }
+  .dots i:nth-child(2) { animation-delay: .15s; } .dots i:nth-child(3) { animation-delay: .3s; }
+  @keyframes b { 0%, 80%, 100% { transform: translateY(0); opacity: .4; } 40% { transform: translateY(-3px); opacity: 1; } }
+
+  /* composer */
+  .composer { padding: 10px 12px 14px; border-top: 1px solid var(--border); background: var(--surface); }
+  .quick { display: flex; gap: 6px; overflow-x: auto; padding: 2px 2px 10px; scrollbar-width: none; }
+  .quick::-webkit-scrollbar { display: none; }
+  .chip { white-space: nowrap; border: 1px solid var(--border); background: var(--surface); border-radius: 999px; padding: 6px 12px;
+          font-size: 12.5px; cursor: pointer; color: var(--text); display: inline-flex; gap: 6px; align-items: center; }
+  .chip:hover { border-color: var(--accent); color: var(--accent); }
+  .chip svg { width: 14px; height: 14px; }
+  .field { display: flex; align-items: flex-end; gap: 8px; background: var(--surface-2); border: 1px solid var(--border);
+           border-radius: 16px; padding: 6px 6px 6px 14px; transition: border-color .15s, box-shadow .15s; }
+  .field:focus-within { border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); }
+  textarea { flex: 1; border: 0; outline: 0; background: transparent; resize: none; padding: 7px 0; max-height: 120px; min-height: 22px; }
+  .send { width: 38px; height: 38px; border: 0; border-radius: 12px; cursor: pointer; flex: none; display: grid; place-items: center;
+          background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #fff; transition: transform .1s, opacity .15s; }
+  .send:active { transform: scale(.94); }
+  .send:disabled { opacity: .35; cursor: default; }
+  .send svg { width: 18px; height: 18px; }
+
+  /* welcome */
+  .welcome { flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 28px 26px; text-align: center; }
+  .hero { width: 64px; height: 64px; border-radius: 20px; margin: 0 auto 18px; display: grid; place-items: center; color: #fff;
+          background: linear-gradient(135deg, var(--accent), var(--accent-2)); box-shadow: 0 12px 30px -10px var(--accent); }
+  .hero svg { width: 32px; height: 32px; }
+  .welcome h1 { font-size: 22px; letter-spacing: -.02em; margin: 0 0 6px; }
+  .welcome p { color: var(--muted); margin: 0 0 22px; }
+  .feat { display: grid; gap: 8px; text-align: left; margin-bottom: 22px; }
+  .feat div { display: flex; gap: 10px; align-items: center; font-size: 13.5px; padding: 10px 12px; border-radius: 12px; background: var(--surface-2); }
+  .feat svg { width: 18px; height: 18px; color: var(--accent); flex: none; }
+  .welcome input { width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--border); background: var(--surface-2); outline: 0; }
+  .welcome input:focus { border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); }
+  .primary { width: 100%; margin-top: 10px; padding: 12px; border: 0; border-radius: 12px; cursor: pointer; font-weight: 600; color: #fff;
+             background: linear-gradient(135deg, var(--accent), var(--accent-2)); }
+  [hidden] { display: none !important; }
+  @media (max-width: 520px) {
+    body { padding: 0; place-items: stretch; }
+    .app { width: 100%; height: 100%; min-height: 0; border-radius: 0; border: 0; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="head" id="head">
+    <div class="avatar" id="avatar"></div>
+    <div class="who"><b id="whoName">Aria</b><span id="whoSub">AI assistant · replies instantly</span></div>
+    <button class="icon-btn" id="restart" title="Start a new conversation" aria-label="Start a new conversation">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+    </button>
+  </header>
+  <div class="banner" id="banner">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+    <span>You're in the queue. A team member will join shortly. You can keep typing.</span>
+  </div>
+
+  <section class="welcome" id="welcome">
+    <div class="hero"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l1.8 5.2L19 9l-5.2 1.8L12 16l-1.8-5.2L5 9l5.2-1.8zM19 14l.9 2.1L22 17l-2.1.9L19 20l-.9-2.1L16 17l2.1-.9z"/></svg></div>
+    <h1>Hi there 👋</h1>
+    <p>I'm Aria, your support assistant. Our team is right behind me when you need them.</p>
+    <div class="feat">
+      <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 12h18M3 12l4-4M3 12l4 4"/><path d="M21 6v12"/></svg>Refunds, checked by a supervisor when needed</div>
+      <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18M7 15h3"/></svg>Budget requests with live approval status</div>
+      <div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>Talk to a real person any time</div>
+    </div>
+    <form id="startForm">
+      <input id="nameInput" placeholder="Your name (optional)" autocomplete="name" maxlength="40">
+      <button class="primary">Start chatting</button>
+    </form>
+  </section>
+
+  <div class="log" id="log" hidden>
+    <div id="msgs"></div>
+    <div class="typing" id="typing"><span class="dots"><i></i><i></i><i></i></span><span id="typingText"></span></div>
+  </div>
+
+  <footer class="composer" id="composer" hidden>
+    <div class="quick" id="quick">
+      <button class="chip" type="button" data-text="I'd like a refund of 80 for order A1001, the item arrived damaged">Refund 80</button>
+      <button class="chip" type="button" data-text="ขอคืนเงิน 450 บาท ออเดอร์ A1002 สินค้าชำรุด">คืนเงิน 450</button>
+      <button class="chip" type="button" data-text="ขออนุมัติงบ 20,000 สำหรับจัดงานทีม">ขออนุมัติงบ 20,000</button>
+      <button class="chip" type="button" data-text="I'd like to talk to a person, please">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>Talk to a person</button>
+    </div>
+    <form class="field" id="form">
+      <textarea id="input" rows="1" placeholder="Write a message…" aria-label="Message"></textarea>
+      <button class="send" id="send" aria-label="Send" disabled>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </button>
+    </form>
+  </footer>
+</div>
+<script>
+const $ = id => document.getElementById(id);
+const SPARK = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l1.8 5.2L19 9l-5.2 1.8L12 16l-1.8-5.2L5 9l5.2-1.8z"/></svg>';
+const ICONS = {
+  issue_refund: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 12h18M3 12l4-4M3 12l4 4"/><path d="M21 6v12"/></svg>',
+  request_budget_approval: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18M7 15h3"/></svg>',
+};
+const TOOL_LABEL = { issue_refund: 'Refund', request_budget_approval: 'Budget request' };
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const money = n => Number(n).toLocaleString(undefined, { maximumFractionDigits: 2 });
+const clock = ts => new Date(ts * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+const initials = n => (n || '?').trim().split(/\s+/).map(w => [...w][0]).slice(0, 2).join('').toUpperCase();
+const store = { get: k => { try { return localStorage.getItem(k); } catch { return null; } },
+                set: (k, v) => { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch {} } };
+
+let sid = store.get('sid'), messages = [], approvals = {}, mode = 'ai', agentName = '', es = null, humanTypingTimer = null;
+
+function setHeader() {
+  const human = mode === 'active';
+  $('head').classList.toggle('human', human);
+  $('avatar').innerHTML = (human ? esc(initials(agentName)) : SPARK) + '<i class="online"></i>';
+  $('whoName').textContent = human ? agentName : 'Aria';
+  $('whoSub').innerHTML = human ? 'Support team · real person'
+    : mode === 'queued' ? '<i class="pulse"></i>Finding a team member…' : 'AI assistant · replies instantly';
+  $('banner').classList.toggle('show', mode === 'queued');
+}
+
+function approvalCard(a) {
+  const decided = a.status !== 'pending';
+  const last = a.status === 'approved' ? ['ok', 'Approved'] : a.status === 'rejected' ? ['bad', 'Declined'] : ['', 'Decision'];
+  return `<div class="req" data-approval="${esc(a.id)}">
+    <div class="top"><div class="ic">${ICONS[a.tool] || ICONS.issue_refund}</div>
+      <div><div class="t">${esc(TOOL_LABEL[a.tool] || a.tool)} · #${esc(a.id)}</div>
+        <div class="amt">${a.args.amount != null ? money(a.args.amount) : ''}</div>
+        <div class="why">${esc(a.args.reason || '')}${a.args.order_id ? ' · ' + esc(a.args.order_id) : ''}</div></div></div>
+    <div class="steps">
+      <div class="step done"><i></i>Submitted</div>
+      <div class="step ${decided ? 'done' : 'now'}"><i></i>${decided ? 'Reviewed' : 'Supervisor review'}</div>
+      <div class="step ${last[0]}"><i></i>${last[1]}</div>
+    </div>
+    ${a.note ? `<div class="note"><b>${esc(a.decided_by || 'Supervisor')}:</b> ${esc(a.note)}</div>` : ''}
+  </div>`;
+}
+
+function render() {
+  let html = '', prev = null;
+  messages.forEach((m, i) => {
+    if (m.role === 'system') { html += `<div class="sys ${m.text.startsWith('The assistant hit an error') ? 'err' : ''}"><span>${esc(m.text)}</span></div>`; prev = null; return; }
+    if (m.role === 'approval') { const a = approvals[m.approval_id]; if (a) html += approvalCard(a); prev = null; return; }
+    const next = messages[i + 1];
+    const key = r => r && (r.role + '|' + r.author);
+    const first = key(prev) !== key(m), last = key(next) !== key(m);
+    const av = m.role === 'human' ? esc(initials(m.author)) : SPARK;
+    html += `<div class="row ${m.role} ${first ? 'first' : ''} ${last ? 'last' : ''}">
+      ${m.role !== 'customer' ? `<div class="mini">${av}</div>` : ''}
+      <div class="stack">
+        ${first && m.role === 'human' ? `<div class="name">${esc(m.author)} · Support team</div>` : ''}
+        <div class="bubble">${esc(m.text)}</div>
+        ${last ? `<div class="time">${clock(m.ts)}</div>` : ''}
+      </div></div>`;
+    prev = m;
+  });
+  $('msgs').innerHTML = html;
+  scrollDown();
+}
+
+function scrollDown() { requestAnimationFrame(() => { $('log').scrollTop = $('log').scrollHeight; }); }
+
+function showTyping(who, on) {
+  $('typing').classList.toggle('show', on);
+  $('typingText').textContent = who === 'human' ? `${agentName} is typing…` : '';
+  if (on) scrollDown();
+}
+
+async function loadSnapshot() {
+  const res = await fetch(`/api/sessions/${sid}`);
+  if (!res.ok) throw new Error('gone');
+  const s = await res.json();
+  messages = s.messages; approvals = s.approvals; mode = s.mode; agentName = s.agent_name;
+  setHeader(); render();
+}
+
+function connect() {
+  es?.close();
+  es = new EventSource(`/api/sessions/${sid}/stream`);
+  let dropped = false;
+  es.onerror = () => { dropped = true; };
+  es.onopen = () => { if (dropped) loadSnapshot().catch(() => {}); };
+  es.onmessage = e => {
+    const ev = JSON.parse(e.data);
+    if (ev.type === 'message') {
+      if (messages.some(m => m.id === ev.message.id)) return;
+      if (ev.message.role !== 'customer') showTyping(null, false);
+      messages.push(ev.message); render();
+    } else if (ev.type === 'approval') {
+      approvals[ev.approval.id] = ev.approval;
+      const el = document.querySelector(`[data-approval="${CSS.escape(ev.approval.id)}"]`);
+      if (el) el.outerHTML = approvalCard(ev.approval);
+    } else if (ev.type === 'mode') {
+      mode = ev.mode; agentName = ev.agent_name; setHeader();
+    } else if (ev.type === 'typing') {
+      showTyping(ev.who, ev.on);
+      if (ev.who === 'human') { clearTimeout(humanTypingTimer); humanTypingTimer = setTimeout(() => showTyping('human', false), 3000); }
+    }
+  };
+}
+
+function enterChat() {
+  $('welcome').hidden = true; $('log').hidden = false; $('composer').hidden = false;
+  connect(); $('input').focus();
+}
+
+async function start(name) {
+  const res = await fetch('/api/sessions', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name }) });
+  sid = (await res.json()).session_id; store.set('sid', sid);
+  await loadSnapshot(); enterChat();
+}
+
+async function send(text) {
+  text = text.trim();
+  if (!text) return;
+  $('input').value = ''; autosize(); $('send').disabled = true;
+  try {
+    const res = await fetch(`/api/sessions/${sid}/messages`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text }) });
+    if (res.status === 404) { store.set('sid', null); location.reload(); }
+  } catch {
+    messages.push({ id: 'err' + Date.now(), role: 'system', text: 'The assistant hit an error: message not sent. Check your connection.', ts: Date.now() / 1000 }); render();
+  }
+}
+
+function autosize() { const t = $('input'); t.style.height = 'auto'; t.style.height = t.scrollHeight + 'px'; $('send').disabled = !t.value.trim(); }
+
+$('startForm').addEventListener('submit', e => { e.preventDefault(); start($('nameInput').value.trim()); });
+$('form').addEventListener('submit', e => { e.preventDefault(); send($('input').value); });
+$('input').addEventListener('input', autosize);
+$('input').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); $('form').requestSubmit(); } });
+$('quick').addEventListener('click', e => { const c = e.target.closest('.chip'); if (c) send(c.dataset.text); });
+$('restart').addEventListener('click', () => { store.set('sid', null); location.reload(); });
+
+setHeader();
+if (sid) loadSnapshot().then(enterChat).catch(() => { store.set('sid', null); sid = null; });
+</script>
+</body>
+</html>
