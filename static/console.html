@@ -3,29 +3,30 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Support Console</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27%3E%3Crect width=%2724%27 height=%2724%27 rx=%276%27 fill=%27%235146e5%27/%3E%3Cpath d=%27M12 4l1.6 4.6L18 10l-4.4 1.4L12 16l-1.6-4.6L6 10l4.4-1.4z%27 fill=%27white%27/%3E%3C/svg%3E">
+<title>Shopio Support Console</title>
+<link rel="icon" href="/static/brand/mark.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
+  /* Shopio theme: tokens from the Shopio deck and logo */
   :root {
-    --bg: #f4f5f9; --surface: #ffffff; --surface-2: #f7f8fb; --hover: #f0f1f7; --border: #e5e7ef;
-    --text: #151826; --muted: #6b7083; --faint: #9aa0b4;
-    --rail: #12142a; --rail-text: #c9cce0; --rail-muted: #7d82a3; --rail-active: #23264a;
-    --accent: #5146e5; --accent-2: #7c5cff; --accent-soft: #eceafe;
-    --human: #0f9d76; --human-soft: #e2f6ef;
-    --ok: #12996b; --ok-soft: #e1f6ee; --bad: #d23f3f; --bad-soft: #fdeaea; --warn: #b8730a; --warn-soft: #fff3dc;
-    --shadow: 0 1px 2px rgba(20, 24, 60, .05), 0 6px 20px -12px rgba(20, 24, 60, .2);
+    --bg: #f5f8fd; --surface: #ffffff; --surface-2: #f3f6fc; --hover: #eef3fc; --border: #e3eaf7;
+    --text: #1b2559; --muted: #5a6683; --faint: #9aa4bd;
+    --rail: #1b2559; --rail-text: #c9d3ea; --rail-muted: #8e9cc0; --rail-active: #26347a;
+    --accent: #1f4fd8; --accent-2: #3b7cf7; --accent-soft: #e4eeff; --logo-1: #00b6fa; --logo-2: #006ff2;
+    --human: #6d3fd8; --human-soft: #f4effe; --orange: #f28c28;
+    --ok: #15a05b; --ok-soft: #e3f5eb; --bad: #e5484d; --bad-soft: #fdecec; --warn: #e07a10; --warn-soft: #fff7ec;
+    --shadow: 0 1px 2px rgba(27, 37, 89, .05), 0 10px 26px -16px rgba(27, 37, 89, .3);
   }
   @media (prefers-color-scheme: dark) {
     :root {
-      --bg: #0c0e16; --surface: #141726; --surface-2: #181c2d; --hover: #1d2135; --border: #252a3f;
-      --text: #eceef6; --muted: #a0a6bd; --faint: #6c7290;
-      --rail: #090a12; --rail-text: #c9cce0; --rail-muted: #6c7190; --rail-active: #1c1f3a;
-      --accent: #7f75ff; --accent-2: #a58bff; --accent-soft: #24224a;
-      --human: #38c99c; --human-soft: #12302a;
-      --ok: #3ccf98; --ok-soft: #123026; --bad: #ff7676; --bad-soft: #3a1a1d; --warn: #f2b453; --warn-soft: #36290f;
+      --bg: #0a0f27; --surface: #0d1330; --surface-2: #151d42; --hover: #18214a; --border: rgba(255,255,255,.09);
+      --text: #eef2fb; --muted: #8e9cc0; --faint: #6b7799;
+      --rail: #070b1f; --rail-text: #c9d3ea; --rail-muted: #6b7799; --rail-active: #1c2a63;
+      --accent: #3b7cf7; --accent-2: #5b95ff; --accent-soft: #1c2a63;
+      --human: #a585ff; --human-soft: #221a48;
+      --ok: #3ccf8e; --ok-soft: #10301f; --bad: #ff7a7e; --bad-soft: #3a1a1e; --warn: #f7b955; --warn-soft: #2e220e;
       --shadow: none;
     }
   }
@@ -38,7 +39,9 @@
 
   /* rail */
   .rail { background: var(--rail); color: var(--rail-text); display: flex; flex-direction: column; padding: 18px 12px; gap: 4px; }
-  .brand { display: flex; align-items: center; gap: 10px; padding: 4px 8px 20px; font-weight: 650; color: #fff; letter-spacing: -.01em; }
+  .brand { padding: 6px 10px 22px; color: var(--rail-muted); font-size: 11.5px; font-weight: 600; }
+  .brand img.full { height: 26px; display: block; margin-bottom: 4px; }
+  .brand .mk { display: none; width: 34px; height: 34px; }
   .logo { width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center; background: linear-gradient(135deg, var(--accent), var(--accent-2)); }
   .logo svg { width: 17px; height: 17px; }
   .navlabel { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--rail-muted); padding: 10px 10px 6px; }
@@ -50,9 +53,9 @@
   .nav span { flex: 1; }
   .count { min-width: 22px; padding: 1px 7px; border-radius: 999px; font-size: 11.5px; font-weight: 600; text-align: center;
            background: rgba(255,255,255,.08); color: var(--rail-text); }
-  .count.hot { background: #ff6b5a; color: #fff; }
+  .count.hot { background: var(--orange); color: #fff; }
   .me { margin-top: auto; padding: 12px 10px 4px; border-top: 1px solid rgba(255,255,255,.07); display: flex; gap: 10px; align-items: center; }
-  .me .av { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #0f9d76, #22b8a0); display: grid; place-items: center;
+  .me .av { width: 32px; height: 32px; border-radius: 50%; background: var(--human); display: grid; place-items: center;
             font-size: 12px; font-weight: 600; color: #fff; flex: none; }
   .me input { width: 100%; background: transparent; border: 0; color: #fff; padding: 2px 0; outline: 0; border-bottom: 1px dashed transparent; }
   .me input:hover, .me input:focus { border-bottom-color: var(--rail-muted); }
@@ -64,7 +67,7 @@
   /* list */
   .list { background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; min-width: 0; }
   .list header { padding: 20px 18px 12px; }
-  .list h2 { margin: 0; font-size: 18px; letter-spacing: -.02em; }
+  .list h2 { margin: 0; font: 800 20px/1.2 "Plus Jakarta Sans", "Inter", sans-serif; letter-spacing: -.02em; }
   .list p { margin: 2px 0 0; color: var(--muted); font-size: 12.5px; }
   .seg { display: flex; gap: 4px; margin-top: 12px; background: var(--surface-2); padding: 3px; border-radius: 10px; border: 1px solid var(--border); }
   .seg button { flex: 1; border: 0; background: none; padding: 5px 8px; border-radius: 7px; cursor: pointer; font-size: 12.5px; color: var(--muted); }
@@ -95,7 +98,7 @@
   @keyframes blink { 50% { opacity: .25; } }
   .amount-sm { font-weight: 600; font-variant-numeric: tabular-nums; color: var(--text); }
   .empty { text-align: center; color: var(--muted); padding: 60px 24px; }
-  .empty svg { width: 40px; height: 40px; color: var(--faint); margin-bottom: 10px; }
+  .empty img { width: 110px; margin-bottom: 8px; }
   .empty b { display: block; color: var(--text); margin-bottom: 4px; }
 
   /* detail */
@@ -103,7 +106,7 @@
   .dhead { padding: 16px 24px; background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; min-height: 72px; }
   .dhead .av { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; font-weight: 600; background: var(--surface-2); border: 1px solid var(--border); flex: none; }
   .dhead .t { flex: 1; min-width: 0; }
-  .dhead h3 { margin: 0; font-size: 16px; letter-spacing: -.01em; }
+  .dhead h3 { margin: 0; font: 800 17px/1.25 "Plus Jakarta Sans", "Inter", "Noto Sans Thai", sans-serif; letter-spacing: -.01em; }
   .dhead .s { font-size: 12.5px; color: var(--muted); display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
   .back { display: none; border: 0; background: none; padding: 6px; margin-left: -8px; cursor: pointer; color: var(--muted); }
   .back svg { width: 20px; height: 20px; }
@@ -120,7 +123,7 @@
 
   .card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--shadow); }
   .ap-hero { padding: 22px 24px; display: flex; gap: 18px; align-items: center; flex-wrap: wrap; }
-  .ap-hero .big { font-size: 34px; font-weight: 700; letter-spacing: -.03em; font-variant-numeric: tabular-nums; line-height: 1.1; }
+  .ap-hero .big { font: 800 36px/1.1 "Plus Jakarta Sans", "Inter", sans-serif; letter-spacing: -.03em; font-variant-numeric: tabular-nums; line-height: 1.1; }
   .ap-hero .lbl { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
   .facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); border-top: 1px solid var(--border); }
   .facts div { padding: 14px 24px; border-right: 1px solid var(--border); }
@@ -155,6 +158,7 @@
   .m.customer .b { background: var(--surface); border: 1px solid var(--border); border-bottom-left-radius: 5px; }
   .m.ai .b { background: var(--accent-soft); border-bottom-right-radius: 5px; }
   .m.human .b { background: var(--human); color: #fff; border-bottom-right-radius: 5px; }
+  .m .who img { width: 16px; height: 16px; border-radius: 50%; vertical-align: -4px; margin-right: 4px; }
   .tx .sys { align-self: center; font-size: 11.5px; color: var(--muted); background: var(--surface-2); border: 1px solid var(--border); padding: 3px 10px; border-radius: 999px; margin: 10px 0; }
   .tx .apref { align-self: flex-end; font-size: 12px; margin: 8px 0; padding: 6px 10px; border-radius: 10px; border: 1px dashed var(--border); color: var(--muted); cursor: pointer; background: none; }
   .tx .apref:hover { border-color: var(--accent); color: var(--accent); }
@@ -168,17 +172,19 @@
   .takeover { display: flex; gap: 14px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
   .takeover p { margin: 0; color: var(--muted); font-size: 13px; flex: 1; min-width: 200px; }
   .placeholder { flex: 1; display: grid; place-items: center; color: var(--muted); text-align: center; padding: 24px; }
-  .placeholder svg { width: 56px; height: 56px; color: var(--faint); }
+  .placeholder img { width: 150px; animation: floaty 3.2s ease-in-out infinite; }
+  @keyframes floaty { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+  .placeholder b { display: block; font: 800 18px "Plus Jakarta Sans", Inter, sans-serif; color: var(--text); margin-top: 8px; }
   .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(20px); opacity: 0; transition: .2s; pointer-events: none;
            background: var(--text); color: var(--surface); padding: 10px 16px; border-radius: 10px; font-size: 13px; z-index: 9; }
   .toast.show { opacity: 1; transform: translateX(-50%); }
 
-  @media (max-width: 1100px) { .shell { grid-template-columns: 76px 320px 1fr; } .rail .brand span, .nav span, .navlabel, .me div, .live span { display: none; }
-                               .nav { justify-content: center; position: relative; } .nav .count { position: absolute; top: 2px; right: 4px; min-width: 18px; padding: 0 5px; font-size: 10px; } .brand { justify-content: center; padding: 4px 0 20px; } .me { justify-content: center; } }
+  @media (max-width: 1100px) { .shell { grid-template-columns: 76px 320px 1fr; } .rail .brand span, .brand .full, .nav span, .navlabel, .me div, .live span { display: none; }
+                               .nav { justify-content: center; position: relative; } .nav .count { position: absolute; top: 2px; right: 4px; min-width: 18px; padding: 0 5px; font-size: 10px; } .brand { display: flex; justify-content: center; padding: 4px 0 20px; } .brand .mk { display: block; } .me { justify-content: center; } }
   @media (max-width: 760px) {
     .shell { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
     .rail { flex-direction: row; padding: 8px 12px; align-items: center; gap: 6px; }
-    .rail .brand { padding: 0 6px 0 0; } .navlabel, .me, .live { display: none; }
+    .rail .brand { padding: 0 6px 0 0; } .rail .brand .full, .rail .brand span { display: none; } .rail .brand .mk { display: block; width: 30px; height: 30px; } .navlabel, .me, .live { display: none; }
     .nav { width: auto; padding: 8px 12px; } .nav .count { position: static; }
     .list, .detail { grid-row: 2; grid-column: 1; min-height: 0; }
     .shell.has-sel .list { display: none; } .shell:not(.has-sel) .detail { display: none; }
@@ -190,7 +196,7 @@
 <body>
 <div class="shell" id="shell">
   <nav class="rail">
-    <div class="brand"><div class="logo"><svg viewBox="0 0 24 24" fill="#fff"><path d="M12 2l1.8 5.2L19 9l-5.2 1.8L12 16l-1.8-5.2L5 9l5.2-1.8z"/></svg></div><span>Support Console</span></div>
+    <div class="brand"><img src="/static/brand/logo-white.png" alt="Shopio" class="full"><img src="/static/brand/mark.png" alt="Shopio" class="mk"><span>Support Console</span></div>
     <div class="navlabel">Inbox</div>
     <button class="nav" data-view="approvals" aria-current="true" title="Approvals">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"/><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/></svg>
@@ -216,8 +222,8 @@
 
   <section class="detail" id="detail">
     <div class="placeholder"><div>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M3 9h18M8 14h5"/></svg>
-      <p>Select an item to review it</p></div></div>
+      <img src="/static/brand/mascot-6.png" alt="">
+      <b>Welcome back</b><p>Pick an approval or a conversation to get started.</p></div></div>
   </section>
 </div>
 <div class="toast" id="toast"></div>
@@ -240,7 +246,7 @@ const ICON = {
   back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 6l-6 6 6 6"/></svg>',
   info: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>',
   hand: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>',
-  bot: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l1.8 5.2L19 9l-5.2 1.8L12 16l-1.8-5.2L5 9l5.2-1.8z"/></svg>',
+  bot: '<img src="/static/brand/avatar.png" alt="" style="width:20px;height:20px;border-radius:50%">',
   send: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
 };
 const TOOL = {
@@ -249,7 +255,7 @@ const TOOL = {
   request_budget_approval: { label: 'Budget request', cls: 'budget',
     mech: '<code>request_budget_approval</code> is a <code>LongRunningFunctionTool</code>. It returned "pending" and the customer kept chatting; your decision is delivered later as the final function response.' },
 };
-const MODE = { ai: ['ai', 'AI handling'], queued: ['queued', 'Waiting for agent'], active: ['active', 'Human agent'] };
+const MODE = { ai: ['ai', 'Shopio AI handling'], queued: ['queued', 'Waiting for agent'], active: ['active', 'Human agent'] };
 
 let convs = {}, approvals = {}, view = 'approvals', filter = { approvals: 'pending', chats: 'open' };
 let sel = null, transcript = [], notes = {}, drafts = {}, lastTyping = 0;
@@ -293,7 +299,7 @@ function renderList() {
       .sort((a, b) => rank[a.mode] - rank[b.mode] || (a.mode === 'queued' ? a.updated_at - b.updated_at : b.updated_at - a.updated_at));
     html = rows.map(c => {
       const lm = c.last_message, [cls, label] = MODE[c.mode];
-      const who = lm ? (lm.role === 'customer' ? '' : lm.role === 'human' ? 'You: ' : lm.role === 'ai' ? 'AI: ' : '') : '';
+      const who = lm ? (lm.role === 'customer' ? '' : lm.role === 'human' ? lm.author + ': ' : lm.role === 'ai' ? 'Shopio AI: ' : '') : '';
       return `<button class="item" data-type="chat" data-id="${esc(c.id)}" aria-current="${sel?.type === 'chat' && sel.id === c.id}">
         <div class="av person">${esc(initials(c.customer))}</div>
         <div class="body"><div class="l1"><b>${esc(c.customer)}</b><time>${ago(c.updated_at)}</time></div>
@@ -304,7 +310,7 @@ function renderList() {
   $('items').innerHTML = html;
 }
 function empty([t, s]) {
-  return `<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/></svg><b>${t}</b>${s}</div>`;
+  return `<div class="empty"><img src="/static/brand/${t === 'All caught up' || t === 'No one is waiting' ? 'mascot-5' : 'mascot-2'}.png" alt=""><b>${t}</b>${s}</div>`;
 }
 
 /* ---------- detail ---------- */
@@ -315,8 +321,8 @@ function txHtml(msgs) {
       const a = approvals[m.approval_id]; if (!a) return '';
       return `<button class="apref" data-open-approval="${esc(a.id)}">${esc((TOOL[a.tool] || {}).label || a.tool)} #${esc(a.id)} · ${a.args.amount != null ? money(a.args.amount) : ''} · <b>${esc(a.status)}</b></button>`;
     }
-    const who = m.role === 'customer' ? m.author : m.role === 'ai' ? 'AI assistant' : m.author;
-    return `<div class="m ${m.role}"><div class="who">${esc(who)}</div><div class="b">${esc(m.text)}</div></div>`;
+    const who = m.role === 'customer' ? m.author : m.role === 'ai' ? 'Shopio AI' : m.author;
+    return `<div class="m ${m.role}"><div class="who">${m.role === 'ai' ? '<img src="/static/brand/avatar.png" alt="">' : ''}${esc(who)}</div><div class="b">${esc(m.text)}</div></div>`;
   }).join('');
 }
 
@@ -358,7 +364,7 @@ function renderDetail() {
     const c = convs[sel.id];
     const [cls, label] = MODE[c.mode];
     const mine = c.mode === 'active';
-    const actions = mine ? `<button class="btn" data-release title="Hand back to AI">${ICON.bot}<span class="lbl">Hand back to AI</span></button>` : '';
+    const actions = mine ? `<button class="btn" data-release title="Hand back to AI">${ICON.bot}<span class="lbl">Hand back to Shopio AI</span></button>` : '';
     let foot;
     if (mine) {
       foot = `<div class="reply"><form id="replyForm"><textarea id="reply" rows="1" placeholder="Reply to ${esc(c.customer)}…">${esc(drafts[c.id] || '')}</textarea>
@@ -366,7 +372,7 @@ function renderDetail() {
         <div class="bar"><span>The AI is paused while you're in this chat (<code>before_model_callback</code>).</span><span>Enter to send · Shift+Enter for a new line</span></div></div>`;
     } else {
       const msg = c.mode === 'queued' ? `${esc(c.customer)} asked for a person ${ago(c.updated_at) === 'now' ? 'just now' : ago(c.updated_at) + ' ago'}. The AI has stepped aside.`
-                                      : 'The AI assistant is handling this chat. You can take over at any time.';
+                                      : 'Shopio AI is handling this chat. You can take over at any time.';
       foot = `<div class="reply"><div class="takeover"><p>${msg}</p>
         <button class="btn primary" data-join>${ICON.hand}${c.mode === 'queued' ? 'Accept chat' : 'Take over from AI'}</button></div></div>`;
     }
@@ -417,7 +423,7 @@ document.addEventListener('click', async e => {
     return;
   }
   if (t.closest('[data-join]')) { try { await post(`/api/console/conversations/${sel.id}/join`, { agent_name: me() }); } catch {} return; }
-  if (t.closest('[data-release]')) { try { await post(`/api/console/conversations/${sel.id}/release`); toast('Chat handed back to the AI assistant'); } catch {} return; }
+  if (t.closest('[data-release]')) { try { await post(`/api/console/conversations/${sel.id}/release`); toast('Chat handed back to Shopio AI'); } catch {} return; }
 });
 document.addEventListener('input', e => {
   if (e.target.id === 'note') notes[sel.id] = e.target.value;

@@ -1,6 +1,6 @@
-# ADK human-in-the-loop support demo
+# Shopio AI: human-in-the-loop support demo
 
-A customer support agent built with Google ADK that hands work to people in two ways:
+Shopio AI, a customer support agent built with Google ADK, that hands work to people in two ways:
 
 | | Tool-level | Conversation-level |
 |---|---|---|
@@ -11,7 +11,7 @@ A customer support agent built with Google ADK that hands work to people in two 
 
 ## Screens
 
-- **Customer chat** at `http://localhost:8000/`: chat with Aria (the AI assistant), live approval status cards, a queue banner and human-agent takeover.
+- **Customer chat** at `http://localhost:8000/`: chat with Shopio AI, live approval status cards, a queue banner and human-agent takeover.
 - **Support console** at `http://localhost:8000/console`: an approvals inbox (approve or decline with a note) and a conversations inbox (accept a queued chat, take over from the AI, reply, hand back to the AI).
 
 Both screens update live over Server-Sent Events.
@@ -41,5 +41,6 @@ Open the customer chat and the console side by side, then try:
   - long-running tool call → approval item; the decision goes back as the final `FunctionResponse` for the same call id.
   - `transfer_to_human` call → chat queued for a human. Joining sets `handoff_status=active` in session state; the human's messages are written to the ADK session, so the AI has the full history when the chat is handed back.
 - `static/customer.html`, `static/console.html`: the two UIs (no build step).
+- `static/brand/`: Shopio logo, bag mark, mascot poses and avatar, resized from `../shopio/images`. Colours and fonts follow the `:root` tokens in the Shopio deck.
 
 State is kept in memory, so a restart clears all chats.

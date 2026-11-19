@@ -26,6 +26,7 @@ from typing import Any
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse, StreamingResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 load_dotenv(Path(__file__).parent / "support_agent" / ".env")
@@ -44,7 +45,8 @@ STATIC = Path(__file__).parent / "static"
 
 session_service = InMemorySessionService()
 runner = Runner(app_name=APP_NAME, agent=root_agent, session_service=session_service)
-app = FastAPI(title="Support HITL")
+app = FastAPI(title="Shopio support")
+app.mount("/static", StaticFiles(directory=STATIC), name="static")
 
 
 # --------------------------------------------------------------------- model
@@ -188,7 +190,7 @@ def handle_event(conv: Conversation, event: Event) -> None:
         elif fc and fc.name == "transfer_to_human":
             reason = (fc.args or {}).get("reason", "")
             set_mode(conv, "queued", handoff_reason=reason)
-            add_message(conv, Message("system", "Connecting you with a member of our team…"))
+            add_message(conv, Message("system", "Connecting you with the Shopio team…"))
         elif part.text and part.text.strip() and event.author == root_agent.name:
             add_message(conv, Message("ai", part.text.strip()))
 
@@ -256,8 +258,8 @@ async def create_session(body: NewSession) -> dict:
     conv = Conversation(id=session.id, customer=body.name.strip() or "Guest")
     conversations[conv.id] = conv
     hello = f"Hi {conv.customer}! " if body.name.strip() else "Hi! "
-    add_message(conv, Message("ai", hello + "I'm Aria. I can help with refunds and budget "
-                              "requests, or connect you to our team. What can I do for you?"))
+    add_message(conv, Message("ai", hello + "I'm Shopio AI. I can help with refunds and budget "
+                              "requests, or connect you to the Shopio team. What can I do for you?"))
     return {"session_id": conv.id}
 
 
@@ -381,7 +383,7 @@ async def release(session_id: str) -> dict:
     async with conv.lock:
         await record_human_event(conv, state={HANDOFF_STATUS: None, HANDOFF_REASON: None})
     set_mode(conv, "ai", agent_name="", handoff_reason="")
-    add_message(conv, Message("system", f"{name} handed the chat back to the AI assistant"))
+    add_message(conv, Message("system", f"{name} handed the chat back to Shopio AI"))
     return conv.summary()
 
 

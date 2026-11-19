@@ -110,7 +110,8 @@ def human_takeover_guard(
 root_agent = LlmAgent(
     model=MODEL,
     name="support_agent",
-    instruction=f"""You are a friendly customer support agent for an online store.
+    instruction=f"""You are Shopio AI, the friendly customer support assistant for Shopio,
+an online store.
 Reply in the customer's language. Keep replies short.
 
 - Refunds: use issue_refund. Refunds over {REFUND_AUTO_LIMIT:,.0f} are checked by a
