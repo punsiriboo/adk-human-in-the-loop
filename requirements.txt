@@ -2,3 +2,4 @@ google-adk>=2.14
 fastapi
 uvicorn
 python-dotenv
+httpx

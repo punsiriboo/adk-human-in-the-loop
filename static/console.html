@@ -80,7 +80,6 @@
   .item .av { width: 38px; height: 38px; border-radius: 12px; display: grid; place-items: center; flex: none; font-weight: 600; font-size: 13px; }
   .item .av svg { width: 18px; height: 18px; }
   .av.refund { background: var(--accent-soft); color: var(--accent); }
-  .av.budget { background: var(--warn-soft); color: var(--warn); }
   .av.person { background: var(--surface-2); color: var(--muted); border: 1px solid var(--border); border-radius: 50%; }
   .item .body { flex: 1; min-width: 0; }
   .item .l1 { display: flex; gap: 8px; align-items: baseline; }
@@ -119,6 +118,9 @@
   .btn.green { background: var(--ok); border: 0; color: #fff; }
   .btn.red { background: var(--surface); border-color: color-mix(in srgb, var(--bad) 40%, var(--border)); color: var(--bad); }
   .btn.red:hover { background: var(--bad-soft); }
+  .btn.leave { border-color: #f7c98b; background: #fff7ec; color: #b45f06; font-weight: 600; }
+  .btn.leave:hover { background: #ffeed6; }
+  .reply .bar .btn.leave { padding: 5px 12px; font-size: 12.5px; }
   .btn:disabled { opacity: .5; cursor: default; }
 
   .card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--shadow); }
@@ -188,7 +190,7 @@
     .nav { width: auto; padding: 8px 12px; } .nav .count { position: static; }
     .list, .detail { grid-row: 2; grid-column: 1; min-height: 0; }
     .shell.has-sel .list { display: none; } .shell:not(.has-sel) .detail { display: none; }
-    .back { display: block; } .dhead { gap: 10px; } .dhead .btn .lbl { display: none; } .dhead .btn { padding: 9px; } .dhead, .dbody, .reply { padding-left: 16px; padding-right: 16px; }
+    .back { display: block; } .dhead { gap: 10px; } .dhead .btn .lbl { display: none; } .dhead .btn { padding: 9px; } .dhead .btn.leave .lbl { display: inline; } .dhead .btn.leave { padding: 8px 12px; } .dhead, .dbody, .reply { padding-left: 16px; padding-right: 16px; }
     .m { max-width: 88%; }
   }
 </style>
@@ -239,8 +241,8 @@ function ago(ts) {
 }
 const store = { get: k => { try { return localStorage.getItem(k); } catch { return null; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch {} } };
 const ICON = {
-  issue_refund: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 12h18M3 12l4-4M3 12l4 4"/><path d="M21 6v12"/></svg>',
-  request_budget_approval: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18M7 15h3"/></svg>',
+  exit: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3"/><path d="M10 17l-5-5 5-5M5 12h11"/></svg>',
+  request_refund: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 12h18M3 12l4-4M3 12l4 4"/><path d="M21 6v12"/></svg>',
   ok: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/></svg>',
   bad: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M9 9l6 6M15 9l-6 6"/></svg>',
   back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 6l-6 6 6 6"/></svg>',
@@ -250,10 +252,8 @@ const ICON = {
   send: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>',
 };
 const TOOL = {
-  issue_refund: { label: 'Refund', cls: 'refund',
-    mech: 'The agent called <code>issue_refund</code>, which has <code>require_confirmation</code>. ADK paused the call; your decision is sent back as an <code>adk_request_confirmation</code> response and the refund runs only if you approve.' },
-  request_budget_approval: { label: 'Budget request', cls: 'budget',
-    mech: '<code>request_budget_approval</code> is a <code>LongRunningFunctionTool</code>. It returned "pending" and the customer kept chatting; your decision is delivered later as the final function response.' },
+  request_refund: { label: 'Refund request', cls: 'refund',
+    mech: '<code>request_refund</code> is a <code>LongRunningFunctionTool</code>. Refunds over the limit return "pending", so the customer keeps chatting. No money has moved yet: if you approve, the chat service pays the refund and sends the result back to the agent as the final function response for the same call.' },
 };
 const MODE = { ai: ['ai', 'Shopio AI handling'], queued: ['queued', 'Waiting for agent'], active: ['active', 'Human agent'] };
 
@@ -287,7 +287,7 @@ function renderList() {
     html = rows.map(a => {
       const t = TOOL[a.tool] || { label: a.tool, cls: 'refund' };
       return `<button class="item" data-type="approval" data-id="${esc(a.id)}" aria-current="${sel?.type === 'approval' && sel.id === a.id}">
-        <div class="av ${t.cls}">${ICON[a.tool] || ICON.issue_refund}</div>
+        <div class="av ${t.cls}">${ICON[a.tool] || ICON.request_refund}</div>
         <div class="body"><div class="l1"><b>${esc(t.label)} · ${esc(a.customer)}</b><time>${ago(a.created_at)}</time></div>
           <div class="l2"><span class="amount-sm">${a.args.amount != null ? money(a.args.amount) : ''}</span> · ${esc(a.args.reason || '')}</div>
           <div class="l3"><span class="pill ${esc(a.status)}">${esc(a.status)}</span></div></div></button>`;
@@ -317,6 +317,7 @@ function empty([t, s]) {
 function txHtml(msgs) {
   return msgs.map(m => {
     if (m.role === 'system') return `<div class="sys">${esc(m.text)}</div>`;
+    if (m.role === 'orders') return `<div class="sys">${esc(m.text)}: ${m.data.orders.map(o => esc(o.order_id)).join(', ')}</div>`;
     if (m.role === 'approval') {
       const a = approvals[m.approval_id]; if (!a) return '';
       return `<button class="apref" data-open-approval="${esc(a.id)}">${esc((TOOL[a.tool] || {}).label || a.tool)} #${esc(a.id)} · ${a.args.amount != null ? money(a.args.amount) : ''} · <b>${esc(a.status)}</b></button>`;
@@ -364,12 +365,12 @@ function renderDetail() {
     const c = convs[sel.id];
     const [cls, label] = MODE[c.mode];
     const mine = c.mode === 'active';
-    const actions = mine ? `<button class="btn" data-release title="Hand back to AI">${ICON.bot}<span class="lbl">Hand back to Shopio AI</span></button>` : '';
+    const actions = mine ? `<button class="btn leave" data-release title="Leave this chat and hand it back to Shopio AI">${ICON.exit}<span class="lbl">Leave chat</span></button>` : '';
     let foot;
     if (mine) {
       foot = `<div class="reply"><form id="replyForm"><textarea id="reply" rows="1" placeholder="Reply to ${esc(c.customer)}…">${esc(drafts[c.id] || '')}</textarea>
         <button class="btn primary" style="height:44px">${ICON.send}Send</button></form>
-        <div class="bar"><span>The AI is paused while you're in this chat (<code>before_model_callback</code>).</span><span>Enter to send · Shift+Enter for a new line</span></div></div>`;
+        <div class="bar"><span>Shopio AI is paused while you're in this chat · Enter to send</span><button class="btn leave" data-release>${ICON.exit}Leave &amp; hand back to Shopio AI</button></div></div>`;
     } else {
       const msg = c.mode === 'queued' ? `${esc(c.customer)} asked for a person ${ago(c.updated_at) === 'now' ? 'just now' : ago(c.updated_at) + ' ago'}. The AI has stepped aside.`
                                       : 'Shopio AI is handling this chat. You can take over at any time.';
@@ -480,7 +481,12 @@ async function snapshot() {
 function connect() {
   const es = new EventSource('/api/console/stream');
   es.onopen = () => { $('live').classList.remove('off'); snapshot(); };
-  es.onerror = () => $('live').classList.add('off');
+  es.onerror = () => {
+    $('live').classList.add('off');
+    // The browser retries a dropped stream itself, but gives up for good if the
+    // console service answers with an error (chat service down). Retry then.
+    if (es.readyState === EventSource.CLOSED) setTimeout(connect, 3000);
+  };
   es.onmessage = e => applyEvent(JSON.parse(e.data));
 }
 

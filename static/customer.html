@@ -97,6 +97,22 @@
   .sys.err span { color: var(--bad); background: var(--bad-soft); border-color: transparent; }
 
   /* approval card */
+  .orders { margin: 10px 0 4px 38px; max-width: 320px; border: 1px solid var(--line-2); border-radius: 18px; background: var(--surface); overflow: hidden; }
+  .orders .oh { padding: 10px 14px; font-size: 12px; font-weight: 600; color: var(--muted); border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; }
+  .order { all: unset; box-sizing: border-box; width: 100%; display: grid; grid-template-columns: 1fr auto; gap: 2px 10px; padding: 10px 14px; border-bottom: 1px solid var(--line); cursor: pointer; }
+  .order:last-child { border-bottom: 0; }
+  .order:hover:not([disabled]) { background: var(--brand-soft); }
+  .order:focus-visible { outline: 2px solid var(--brand); outline-offset: -2px; }
+  .order .oi { font-weight: 600; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .order .ot { font: 700 14px "Plus Jakarta Sans", "Inter", sans-serif; text-align: right; font-variant-numeric: tabular-nums; }
+  .order .om { font-size: 11.5px; color: var(--muted); }
+  .order .os { font-size: 11px; font-weight: 600; text-align: right; color: var(--ok); }
+  .order .os.no { color: var(--faint); }
+  .order[disabled] { cursor: default; }
+  .order[disabled] .oi, .order[disabled] .ot { color: var(--faint); }
+  .order.picked { background: var(--brand-soft); }
+  .order.picked .oi, .order.picked .ot { color: var(--text); }
+  .order.picked .os { color: var(--brand); }
   .req { position: relative; margin: 14px 0 4px 38px; max-width: 300px; border: 1px solid var(--line-2); border-radius: 18px; background: var(--surface);
          box-shadow: 0 10px 24px -18px rgba(27, 37, 89, .5); }
   .req .top { padding: 12px 14px 10px; display: flex; gap: 10px; align-items: flex-start; }
@@ -165,6 +181,8 @@
   .primary { width: 100%; margin-top: 10px; padding: 12px; border: 0; border-radius: 14px; cursor: pointer; font-weight: 700; color: #fff;
              display: flex; gap: 8px; align-items: center; justify-content: center; background: linear-gradient(90deg, var(--brand), var(--brand-2)); }
   .primary svg { width: 17px; height: 17px; }
+  .primary:disabled { opacity: .45; cursor: default; }
+  .name-label { display: block; text-align: left; font-size: 13px; font-weight: 600; color: var(--muted); margin: 0 0 6px 4px; }
   [hidden] { display: none !important; }
   @media (max-width: 520px) {
     body { padding: 0; place-items: stretch; }
@@ -193,13 +211,14 @@
     <h1>Hi, I'm <span class="hl">Shopio AI</span></h1>
     <p>Ask me anything about your orders. The Shopio team is right behind me when you need a person.</p>
     <div class="feat">
-      <div><span class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-15-6.7L3 13"/></svg></span>Refunds, checked by a supervisor when needed</div>
-      <div><span class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18M7 15h3"/></svg></span>Budget requests with live approval status</div>
+      <div><span class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-15-6.7L3 13"/></svg></span>Refunds; larger ones reviewed by a person, with live status</div>
+      <div><span class="fi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18M7 15h3"/></svg></span>Your orders at a glance: tap one to get help</div>
       <div><span class="fi p"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1v-6h3zM3 19a2 2 0 0 0 2 2h1v-6H3z"/></svg></span>Talk to a real person any time</div>
     </div>
     <form id="startForm">
-      <input id="nameInput" placeholder="Your name (optional)" autocomplete="name" maxlength="40">
-      <button class="primary">Start chatting
+      <label for="nameInput" class="name-label">What should we call you?</label>
+      <input id="nameInput" placeholder="Your name" autocomplete="name" maxlength="40" required>
+      <button class="primary" id="startBtn" disabled>Start chatting
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
     </form>
   </section>
@@ -211,11 +230,12 @@
 
   <footer class="composer" id="composer" hidden>
     <div class="quick" id="quick">
-      <button class="chip" type="button" data-text="I'd like a refund of 80 for order A1001, the item arrived damaged">Refund 80</button>
-      <button class="chip" type="button" data-text="ขอคืนเงิน 450 บาท ออเดอร์ A1002 สินค้าชำรุด">คืนเงิน 450</button>
-      <button class="chip" type="button" data-text="ขออนุมัติงบ 20,000 สำหรับจัดงานทีม">ขออนุมัติงบ 20,000</button>
+      <button class="chip" type="button" data-text="Show my orders">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7h12l-1 13H7z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg>My orders</button>
+      <button class="chip" type="button" data-text="I'd like a refund, please">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-15-6.7L3 13"/></svg>Refund</button>
       <button class="chip" type="button" data-text="I'd like to talk to a person, please">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1v-6h3zM3 19a2 2 0 0 0 2 2h1v-6H3z"/></svg>Talk to a person</button>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1v-6h3zM3 19a2 2 0 0 0 2 2h1v-6H3z"/></svg>Talk with a human</button>
     </div>
     <form class="field" id="form">
       <textarea id="input" rows="1" placeholder="Type a message…" aria-label="Message"></textarea>
@@ -223,17 +243,16 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
       </button>
     </form>
-    <div class="powered">Shopio AI can make mistakes. A person reviews refunds and budget requests.</div>
+    <div class="powered">Shopio AI can make mistakes. A person reviews larger refunds.</div>
   </footer>
 </div>
 <script>
 const $ = id => document.getElementById(id);
 const BOT = '<img src="/static/brand/avatar.png" alt="">';
 const ICONS = {
-  issue_refund: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-15-6.7L3 13"/></svg>',
-  request_budget_approval: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18M7 15h3"/></svg>',
+  request_refund: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-15-6.7L3 13"/></svg>',
 };
-const TOOL_LABEL = { issue_refund: 'Refund', request_budget_approval: 'Budget request' };
+const TOOL_LABEL = { request_refund: 'Refund request' };
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const money = n => Number(n).toLocaleString(undefined, { maximumFractionDigits: 2 });
 const clock = ts => new Date(ts * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -260,7 +279,7 @@ function approvalCard(a) {
   const last = a.status === 'approved' ? ['ok', 'Approved'] : a.status === 'rejected' ? ['bad', 'Declined'] : ['', 'Decision'];
   return `<div class="req" data-approval="${esc(a.id)}">
     ${a.status === 'approved' ? `<img class="cheer" src="/static/brand/mascot-5.png" alt="" style="${cheered.has(a.id) ? 'animation:none' : ''}">` : ''}
-    <div class="top"><div class="ic">${ICONS[a.tool] || ICONS.issue_refund}</div>
+    <div class="top"><div class="ic">${ICONS[a.tool] || ICONS.request_refund}</div>
       <div><div class="t">${esc(TOOL_LABEL[a.tool] || a.tool)} · #${esc(a.id)}</div>
         <div class="amt">${a.args.amount != null ? money(a.args.amount) : ''}</div>
         <div class="why">${esc(a.args.reason || '')}${a.args.order_id ? ' · ' + esc(a.args.order_id) : ''}</div></div></div>
@@ -273,9 +292,37 @@ function approvalCard(a) {
   </div>`;
 }
 
+const isThai = s => /[฀-๿]/.test(s || '');
+const STATUS = { delivered: 'Delivered', shipping: 'On the way', cancelled: 'Cancelled' };
+
+// An order list from search_orders. It stays tappable until the customer sends
+// anything after it; the order they named is then shown as picked.
+function ordersCard(m, i) {
+  const after = messages.slice(i + 1).filter(x => x.role === 'customer');
+  const open = after.length === 0;
+  const pickedId = after.map(x => (x.text.match(/SO-\d+/i) || [])[0]).find(Boolean)?.toUpperCase();
+  const rows = m.data.orders.map(o => {
+    const picked = o.order_id === pickedId;
+    const state = o.refunded ? 'Refunded' : o.refund_pending ? 'In review' : o.refundable ? (picked ? 'Selected' : open ? 'Select' : '') : (STATUS[o.status] || o.status);
+    return `<button class="order ${picked ? 'picked' : ''}" ${open && o.refundable ? `data-order="${esc(o.order_id)}"` : 'disabled'}>
+      <span class="oi">${esc(o.items)}</span><span class="ot">฿${money(o.total)}</span>
+      <span class="om">${esc(o.order_id)} · ${new Date(o.order_date).toLocaleDateString([], { day: 'numeric', month: 'short' })}</span>
+      <span class="os ${o.refundable || picked ? '' : 'no'}">${esc(state)}</span></button>`;
+  }).join('');
+  return `<div class="orders"><div class="oh"><span>${m.data.matched === false ? 'No match · your recent orders' : 'Your orders'}</span><span>${open ? 'Tap to choose' : ''}</span></div>${rows}</div>`;
+}
+
+$('msgs').addEventListener('click', e => {
+  const b = e.target.closest('[data-order]');
+  if (!b) return;
+  const lastCustomer = [...messages].reverse().find(x => x.role === 'customer');
+  send(isThai(lastCustomer?.text) ? `เลือกออเดอร์ ${b.dataset.order}` : `Order ${b.dataset.order}`);
+});
+
 function render() {
   let html = '', prev = null;
   messages.forEach((m, i) => {
+    if (m.role === 'orders') { html += ordersCard(m, i); prev = null; return; }
     if (m.role === 'system') { html += `<div class="sys ${m.text.startsWith('The assistant hit an error') ? 'err' : ''}"><span>${esc(m.text)}</span></div>`; prev = null; return; }
     if (m.role === 'approval') { const a = approvals[m.approval_id]; if (a) html += approvalCard(a); prev = null; return; }
     const next = messages[i + 1];
@@ -365,7 +412,8 @@ async function send(text) {
 
 function autosize() { const t = $('input'); t.style.height = 'auto'; t.style.height = t.scrollHeight + 'px'; $('send').disabled = !t.value.trim(); }
 
-$('startForm').addEventListener('submit', e => { e.preventDefault(); start($('nameInput').value.trim()); });
+$('nameInput').addEventListener('input', () => { $('startBtn').disabled = !$('nameInput').value.trim(); });
+$('startForm').addEventListener('submit', e => { e.preventDefault(); const n = $('nameInput').value.trim(); if (n) start(n); });
 $('form').addEventListener('submit', e => { e.preventDefault(); send($('input').value); });
 $('input').addEventListener('input', autosize);
 $('input').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); $('form').requestSubmit(); } });
